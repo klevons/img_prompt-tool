@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="面向广告创意、活动 Banner 和短视频开屏素材的本地 AI Prompt 工作台。" />
+        <title>Didi Prompt Tool | AI 广告创意 Prompt 工作台</title>
+        <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+        <link rel="stylesheet" href="./styles.css?v=20260510h" />
+    </head>
+    <body class="mode-image">
+        <div class="ambient-bg" aria-hidden="true">
+            <span class="ambient-beam beam-a"></span>
+            <span class="ambient-beam beam-b"></span>
+            <span class="ambient-beam beam-c"></span>
+            <span class="subtle-line line-a"></span>
+            <span class="subtle-line line-b"></span>
+            <span class="illustration-blob blob-a"></span>
+            <span class="illustration-blob blob-b"></span>
+            <span class="doodle-dot dot-a"></span>
+            <span class="doodle-dot dot-b"></span>
+            <span class="doodle-star star-a"></span>
+            <span class="doodle-star star-b"></span>
+            <span class="doodle-wave wave-a"></span>
+        </div>
+
+        <main id="top" class="app-shell">
+            <section id="workspace" class="workspace" aria-label="Prompt 编辑工作台">
+                <aside id="settingsDrawer" class="settings-drawer" aria-label="提示词设置">
+                    <div class="drawer-head">
+                        <div>
+                            <h2>提示词设置</h2>
+                        </div>
+                    </div>
+                    <div class="drawer-body">
+                        <div id="formSections" class="form-sections"></div>
+                    </div>
+                </aside>
+
+                <section class="prompt-panel">
+                    <div class="workbench-topbar">
+                        <div class="toolbar-title">
+                            <h2 id="activeTitle">横版小程序福利 Banner</h2>
+                        </div>
+                        <div class="toolbar-actions">
+                            <div class="mode-switch" aria-label="生成模式切换">
+                                <button id="imageModeBtn" type="button" class="mode-button active">文生图</button>
+                                <button id="videoModeBtn" type="button" class="mode-button">文生视频</button>
+                            </div>
+                            <input id="importFile" type="file" accept="application/json,.json" hidden />
+                        </div>
+                    </div>
+
+                    <section class="quick-preset-strip" aria-label="快捷预设">
+                        <div class="quick-preset-head">
+                            <div>
+                                <h3>快捷预设</h3>
+                            </div>
+                            <button id="showAllPresetsBtn" class="ghost-button" type="button" aria-expanded="false">
+                                查看全部
+                            </button>
+                        </div>
+                        <div id="quickPresetList" class="quick-preset-list"></div>
+                        <div id="allPresetsPanel" class="all-presets-panel" hidden>
+                            <input
+                                id="presetSearch"
+                                class="search-input"
+                                type="search"
+                                placeholder="搜索预设、分类、用途、主体、场景" />
+                            <div id="categoryFilters" class="category-filters"></div>
+                            <div class="all-presets-scroll">
+                                <div id="presetList" class="preset-list"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="prompt-meta" aria-label="当前提示词状态">
+                        <span id="centerMode">文生图</span>
+                        <span id="centerRatio">16:9</span>
+                        <span id="centerPreset">横版小程序福利 Banner</span>
+                    </div>
+
+                    <section class="result-card">
+                        <div class="result-split">
+                            <div class="prompt-side">
+                                <div class="result-head">
+                                    <div>
+                                        <h3 class="prompt-result-title">完整提示词</h3>
+                                    </div>
+                                    <div id="promptTabs" class="prompt-tabs" aria-label="提示词结构切换">
+                                        <button
+                                            id="savePresetInlineBtn"
+                                            class="prompt-tab save-preset-tab active"
+                                            type="button">
+                                            保存为我的预设
+                                        </button>
+                                        <button class="prompt-tab video-tab" type="button" data-format="video">
+                                            视频设置
+                                        </button>
+                                    </div>
+                                </div>
+                                <div
+                                    id="finalPrompt"
+                                    class="prompt-output"
+                                    role="textbox"
+                                    aria-readonly="true"
+                                    tabindex="0"></div>
+                                <div class="result-actions">
+                                    <span id="copyState" class="copy-state">已根据当前内容更新</span>
+                                    <button id="clearBtn" type="button" class="paper-button">清空内容</button>
+                                    <button id="copyFullBtn" type="button" class="primary-button">
+                                        复制完整提示词
+                                    </button>
+                                </div>
+                            </div>
+
+                            <aside class="media-side" aria-label="文生图和文生视频展示区域">
+                                <div class="media-head">
+                                    <div>
+                                        <h3 id="mediaTitle">图片生成预览</h3>
+                                    </div>
+                                    <span id="mediaModeBadge" class="media-mode-badge">文生图</span>
+                                </div>
+                                <div id="mediaPreview" class="media-preview status-idle" aria-live="polite"></div>
+                                <div class="media-actions">
+                                    <button id="generateMediaBtn" type="button" class="primary-button">生成图片</button>
+                                    <button id="downloadMediaBtn" type="button" class="ghost-dark-button" disabled>
+                                        下载结果
+                                    </button>
+                                </div>
+                                <p id="mediaHint" class="media-hint">这里会使用左侧完整提示词生成图片或视频。</p>
+                            </aside>
+                        </div>
+                    </section>
+
+                    <section class="module-card quality-card">
+                        <div class="module-head">
+                            <div>
+                                <h3>Prompt 质量检查</h3>
+                            </div>
+                            <span id="qualitySummary" class="soft-label">实时检查</span>
+                        </div>
+                        <div id="qualityList" class="quality-list"></div>
+                    </section>
+                </section>
+            </section>
+
+            <footer id="privacy" class="site-footer">
+                <div>
+                    <strong>Didi Prompt Tool</strong>
+                    <p>当前版本为本地静态网页，预设和自定义元素保存在浏览器本地存储，不上传服务器。</p>
+                </div>
+                <a href="#top">回到顶部</a>
+            </footer>
+        </main>
+
+        <script src="./app.js?v=20260510c"></script>
+    </body>
+</html>
