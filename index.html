@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>批量提示词工具</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="toast-container" id="toastContainer"></div>
+
+        <div class="app-container">
+            <!-- ==================== LEFT PANEL ==================== -->
+            <div class="panel panel-left">
+                <div class="panel-header">📋 提示词设置</div>
+                <div class="panel-body">
+                    <!-- 基本信息 -->
+                    <div class="section">
+                        <div class="section-title">基本信息</div>
+
+                        <div class="field-group">
+                            <label class="field-label">主体</label>
+                            <select id="subject">
+                                <option value="人物" selected>人物</option>
+                                <option value="物品">物品</option>
+                                <option value="动物">动物</option>
+                                <option value="风景">风景</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">场景</label>
+                            <select id="scene">
+                                <option value="地点" selected>地点</option>
+                                <option value="天气">天气</option>
+                                <option value="时间">时间</option>
+                                <option value="背景氛围">背景氛围</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">风格</label>
+                            <select id="style">
+                                <option value="真人" selected>真人</option>
+                                <option value="卡通">卡通</option>
+                                <option value="风景">风景</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">构图</label>
+                            <select id="composition">
+                                <option value="自然光" selected>自然光</option>
+                                <option value="柔光">柔光</option>
+                                <option value="逆光">逆光</option>
+                                <option value="全景">全景</option>
+                                <option value="特写">特写</option>
+                                <option value="景深">景深</option>
+                                <option value="视角">视角</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">画质</label>
+                            <select id="quality">
+                                <option value="超清 8K" selected>超清 8K</option>
+                                <option value="细节拉满">细节拉满</option>
+                                <option value="电影质感">电影质感</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 广告信息 -->
+                    <div class="section">
+                        <div class="section-title">广告信息</div>
+
+                        <div class="field-group">
+                            <label class="field-label">主标题</label>
+                            <input type="text" id="adMainTitle" value="限时领券" placeholder="输入主标题" />
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">副标题</label>
+                            <input type="text" id="adSubtitle" value="最高立减15元" placeholder="输入副标题" />
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">价格</label>
+                            <input type="text" id="adPrice" value="新人专享" placeholder="输入价格信息" />
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">按钮</label>
+                            <input type="text" id="adButton" value="马上抢" placeholder="输入按钮文字" />
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">完整标语</label>
+                            <textarea id="adSlogan" class="small" placeholder="自动生成标语" readonly></textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">字体要求</label>
+                            <textarea id="adFont" class="small" placeholder="字体设计说明">
+标语字体要有设计感，使用高识别度促销标题字，粗体圆角黑体或立体描边字，主标题可用渐变色、白色描边、轻微投影，按钮字要清晰有点击感，适合小程序横版Banner、开屏横版素材。</textarea
+                            >
+                        </div>
+                    </div>
+
+                    <!-- 否定词 -->
+                    <div class="section">
+                        <div class="section-title">否定词</div>
+                        <div class="field-group">
+                            <textarea id="negativeWords" class="medium" placeholder="输入否定词">
+不要低画质，模糊，变形，残缺，水印文字，多余肢体，五官崩坏，画面杂乱</textarea
+                            >
+                        </div>
+                        <button class="btn btn-primary btn-confirm" onclick="generatePrompt()">🔄 生成提示词</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CENTER PANEL ==================== -->
+            <div class="panel panel-center">
+                <div class="panel-header">
+                    <span>📝 关键词信息</span>
+                </div>
+                <div class="panel-body">
+                    <div class="field-group">
+                        <label class="field-label hint"> 自动生成的提示词（可在此编辑修改） </label>
+                        <textarea
+                            id="keywordOutput"
+                            class="keyword-output"
+                            placeholder="选择左侧选项后将自动生成提示词…"></textarea>
+                    </div>
+                    <div class="action-bar">
+                        <button class="btn btn-outline" onclick="copyPrompt()">📋 复制</button>
+                        <button class="btn btn-success" onclick="saveToHistory()">💾 保存</button>
+                        <button class="btn btn-outline" onclick="clearPrompt()">🗑️ 清空</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== RIGHT PANEL ==================== -->
+            <div class="panel panel-right">
+                <div class="panel-header">
+                    <span>📚 历史记录</span>
+                    <span class="header-actions">
+                        <button class="btn btn-clear-all" onclick="clearAllHistory()">清空</button>
+                        <span class="header-count" id="historyCount">0 条</span>
+                    </span>
+                </div>
+                <div class="panel-body" id="historyPanelBody">
+                    <div class="history-empty" id="historyEmpty">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5">
+                            <path d="M12 8v4l3 3M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
+                        </svg>
+                        <div>暂无历史记录</div>
+                        <div class="sub-text">保存的提示词将显示在这里</div>
+                    </div>
+                    <div class="history-list" id="historyList"></div>
+                </div>
+            </div>
+        </div>
+
+        <script src="app.js"></script>
+    </body>
+</html>
