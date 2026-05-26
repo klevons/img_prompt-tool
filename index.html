@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>批量提示词工具</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- ==================== IMAGE SELECTION MODAL ==================== -->
+        <div class="modal-overlay" id="inspirationModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <span>💡 选择参考图片</span>
+                    <button class="modal-close" onclick="closeInspirationModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-hint">点击选择一张图片作为参考，支持透视、构图、配色等视觉参考</p>
+                    <div class="image-grid" id="imageGrid"></div>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-footer-left">
+                        <span id="selectedImageInfo">尚未选择图片</span>
+                    </div>
+                    <div class="modal-footer-right">
+                        <button class="btn btn-outline" onclick="closeInspirationModal()">取消</button>
+                        <button class="btn btn-primary" onclick="confirmImageSelection()">确认选择</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-container">
+            <!-- ==================== LEFT PANEL ==================== -->
+            <div class="panel panel-left">
+                <div class="panel-header">&#128203; 提示词设置</div>
+                <div class="panel-body">
+                    <!-- 参照图片 -->
+                    <div class="section">
+                        <div class="section-title">参照图片</div>
+                        <div class="field-group">
+                            <div class="ref-image-preview" id="refImagePreview">
+                                <div class="ref-image-placeholder">
+                                    <svg
+                                        width="32"
+                                        height="32"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="#ccc"
+                                        stroke-width="1.5">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <circle cx="8.5" cy="8.5" r="1.5" />
+                                        <path d="M21 15l-5-5L5 21" />
+                                    </svg>
+                                    <span>尚未选择参考图片</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field-group btn-row">
+                            <button class="btn btn-outline btn-flex" onclick="openInspirationModal()">💡 找灵感</button>
+                            <button
+                                class="btn btn-primary btn-flex"
+                                onclick="extractContent()"
+                                id="extractBtn"
+                                disabled>
+                                🔍 提取内容
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 基本信息 -->
+                    <div class="section">
+                        <div class="section-title">基本信息</div>
+
+                        <div class="field-group">
+                            <label class="field-label">主体</label>
+                            <select id="subject">
+                                <option
+                                    value="食物：一盘切片的北京烤鸭，鸭皮呈琥珀焦糖色，表面油亮有光泽，纹理清晰酥脆；鸭肉粉嫩多汁，层次分明；搭配翠绿的黄瓜条、洁白的葱丝，一小碟深褐色甜面酱，盛放在温润的白色圆形瓷盘中。辅助元素：瓷盘放置在园林天然石台上，石台旁点缀一片绿色荷叶；画面角落加入美团 IP 小黄鸡、古风毛笔元素，增加品牌辨识度与活泼感"
+                                    selected>
+                                    🍽️ 食物 - 北京烤鸭
+                                </option>
+                                <option
+                                    value="食物：一碗热气腾腾的重庆小面，红油汤底中浸润着筋道的面条，撒上翠绿的葱花、金黄的花生碎和深色的芽菜，顶部卧着一颗溏心煎蛋，蛋液缓缓流淌。辅助元素：竹编碗垫、木筷、蒸腾的热气丝">
+                                    🍜 食物 - 重庆小面
+                                </option>
+                                <option
+                                    value="食物：一份精致的日式寿司拼盘，三文鱼、金枪鱼、北极贝等新鲜刺身排列在深色木盘上，肉质纹理清晰可见，旁边配以芥末和姜片。辅助元素：竹帘、酱油碟、樱花点缀">
+                                    🍣 食物 - 日式寿司
+                                </option>
+                                <option
+                                    value="人物：一位身着水墨风格汉服的年轻女子，手持团扇，站在古典庭院中，长发飘逸，眼神温柔含蓄，衣袂随风轻扬">
+                                    👩 人物 - 古风女子
+                                </option>
+                                <option
+                                    value="动物：一只橘色虎斑猫慵懒地趴在窗台上，午后阳光透过百叶窗在它身上投下条纹光影，琥珀色的眼睛半睁半闭">
+                                    🐱 动物 - 午睡猫咪
+                                </option>
+                                <option
+                                    value="风景：清晨的黄山云海，日出的金色光芒洒在翻涌的云层上，奇松怪石在云雾中若隐若现，远处山峰如墨如黛">
+                                    🏔️ 风景 - 黄山云海
+                                </option>
+                                <option value="自定义主体">✏️ 自定义主体</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">场景</label>
+                            <select id="scene">
+                                <option
+                                    value="背景：江南苏州古典园林庭院，白墙黛瓦的中式亭台楼阁，搭配太湖石假山、池塘与翠绿竹林，阳光透过竹叶洒下斑驳光影，水面泛着细碎波光，整体清幽雅致，充满中式意境。前景：带青苔质感的粗糙天然石面，呼应园林场景，让画面更具真实感。"
+                                    selected>
+                                    🏯 中式园林庭院
+                                </option>
+                                <option
+                                    value="背景：现代都市天台餐厅，华灯初上的城市天际线，远处高楼林立灯火辉煌，近处摆放着精致的露天餐桌，暖色串灯在头顶闪烁。前景：深色木质餐桌，上面摆放着精致的餐具和酒杯">
+                                    🌃 都市天台夜景
+                                </option>
+                                <option
+                                    value="背景：日式居酒屋内部，暖黄色的灯笼发出柔和光芒，墙上贴着日文菜单和海报，木制吧台后摆满各式酒瓶，透过半开的门能看到街上行人。前景：吧台上的陶制酒壶和酒杯，冒着热气的小菜">
+                                    🏮 日式居酒屋
+                                </option>
+                                <option
+                                    value="背景：北欧极简风格的开放式厨房，纯白色橱柜搭配浅灰色大理石台面，绿植点缀其中，自然光从大窗户洒入，窗外是茂密的树林。前景：正在准备的食材和厨具">
+                                    🍳 北欧厨房
+                                </option>
+                                <option
+                                    value="背景：热带海岛沙滩，碧蓝的海水拍打着白色沙滩，远处椰树成林，天空呈现夕阳的橙紫渐变色调，海面泛着金色波光。前景：沙滩上的贝壳和细沙纹理">
+                                    🏖️ 热带海岛
+                                </option>
+                                <option value="场景自定义">✏️ 自定义场景</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">风格</label>
+                            <select id="style">
+                                <option
+                                    value="风格：商业美食摄影风，写实主义，高食欲感，明亮清新的国风商业广告风格，色彩鲜亮但不刺眼，契合外卖平台的活泼调性。色调：暖金色调为主，突出烤鸭的诱人色泽；背景的竹林绿与建筑白中和暖调，让画面平衡舒适。"
+                                    selected>
+                                    🎨 国风美食商业摄影
+                                </option>
+                                <option
+                                    value="风格：赛博朋克风，高对比度霓虹色调，以青蓝与洋红为主色，强烈的光影反差，充满未来科技感和都市活力。色调：冷紫色和青色基调，点缀霓虹粉和电光蓝">
+                                    🌆 赛博朋克
+                                </option>
+                                <option
+                                    value="风格：日系小清新风格，柔和的低饱和度色调，画面通透干净，带有淡淡的胶片感，注重生活气息和情感表达。色调：浅蓝、浅粉和白色为主的柔和调色板">
+                                    🌸 日系小清新
+                                </option>
+                                <option
+                                    value="风格：北欧极简风，干净利落的线条和几何构图，大面积留白，突出主体的质感和细节。色调：中性灰白基调，点缀低饱和莫兰迪色系">
+                                    ❄️ 北欧极简
+                                </option>
+                                <option
+                                    value="风格：复古胶片风，具有颗粒感和暖色偏色，模拟 Kodak Portra 胶片质感，光影过渡柔和自然，带有怀旧情绪。色调：暖黄和暗橙为主">
+                                    📷 复古胶片
+                                </option>
+                                <option value="风格自定义">✏️ 自定义风格</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">构图</label>
+                            <select id="composition">
+                                <option
+                                    value="光影：柔和的自然光，顺光+侧光结合，重点突出鸭皮的油亮高光；背景竹林加入丁达尔光效，营造午后庭院的温暖氛围，光影柔和不生硬。构图：烤鸭主体位于画面右侧黄金分割点，背景园林做浅景深虚化处理，突出前景食物；采用平视偏微俯视的美食摄影视角，完整呈现整盘烤鸭与配菜，同时带入环境氛围。"
+                                    selected>
+                                    📐 黄金分割美食构图
+                                </option>
+                                <option
+                                    value="光影：顶光配合侧逆光，营造戏剧性的明暗对比，高光集中在主体关键部位，阴影部分保留细节。构图：中心对称构图，主体严格居中，形成庄重稳定的画面结构，适合高端产品展示">
+                                    🎯 中心对称构图
+                                </option>
+                                <option
+                                    value="光影：柔和的散射光，没有强烈的阴影和反光，整体光线均匀柔和。构图：对角线构图，主体沿画面对角线排列，引导视线流动，适合展示系列产品或美食">
+                                    〰️ 对角线构图
+                                </option>
+                                <option
+                                    value="光影：强烈的侧光，从画面左侧打入，右侧形成深阴影，突出纹理和立体感。构图：极简留白构图，主体位于画面一角，大面积留白给文字和装饰元素空间">
+                                    ⬜ 留白构图
+                                </option>
+                                <option
+                                    value="光影：逆光拍摄，主体边缘形成金色轮廓光，营造梦幻氛围，前景适当补光。构图：三分法构图，主体位于下三分线附近，留出上三分给背景环境">
+                                    ☀️ 逆光轮廓构图
+                                </option>
+                                <option value="构图自定义">✏️ 自定义构图</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">画质</label>
+                            <select id="quality">
+                                <option
+                                    value="画质：8K超高清，商业广告级渲染，细节拉满，鸭皮的油光、葱丝的纹理、瓷盘的温润感、竹林叶片都清晰可见。质感：食物的酥脆/水润感、瓷盘的温润感、石头的粗糙感、竹林的清新感，所有材质表现真实自然。其他：画面干净无杂物，色彩通透，食欲感强"
+                                    selected>
+                                    ✨ 8K超清商业广告级
+                                </option>
+                                <option
+                                    value="画质：4K高清，电影级画面质感，带有自然的胶片颗粒感，画面层次丰富。质感：强调光影过渡的细腻和色彩的还原度，画面有呼吸感和故事感">
+                                    🎬 4K电影质感
+                                </option>
+                                <option
+                                    value="画质：高清写实，细节清晰但不极端锐化，更接近人眼自然观感。质感：自然真实的材质表现，不过度追求纹理细节而牺牲整体和谐">
+                                    🖼️ 高清自然写实
+                                </option>
+                                <option
+                                    value="画质：插画风格，矢量感线条和平涂色彩，清晰度适中，强调设计感和装饰性。质感：平面化的材质表现，不过多追求真实纹理">
+                                    🎨 插画风格
+                                </option>
+                                <option value="画质自定义">✏️ 自定义画质</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 广告信息 -->
+                    <div class="section">
+                        <div class="section-title">广告信息</div>
+
+                        <div class="field-group">
+                            <label class="field-label">主标题</label>
+                            <input type="text" id="adMainTitle" value="领618大额神券" placeholder="输入主标题" />
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">副标题</label>
+                            <input type="text" id="adSubtitle" value="马上参与" placeholder="输入副标题" />
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">价格</label>
+                            <input type="text" id="adPrice" value="最高立减15元" placeholder="输入价格信息" />
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">按钮</label>
+                            <input type="text" id="adButton" value="马上抢" placeholder="输入按钮文字" />
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">完整标语</label>
+                            <textarea id="adSlogan" class="small" placeholder="自动生成标语" readonly></textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">字体要求</label>
+                            <textarea id="adFont" class="small" placeholder="字体设计说明">
+标语字体要有设计感，使用高识别度促销标题字，粗体圆角黑体或立体描边字，主标题可用渐变色、白色描边、轻微投影，按钮字要清晰有点击感，适合小程序横版Banner、开屏横版素材。</textarea
+                            >
+                        </div>
+                    </div>
+
+                    <!-- 否定词 -->
+                    <div class="section">
+                        <div class="section-title">否定词</div>
+                        <div class="field-group">
+                            <textarea id="negativeWords" class="medium" placeholder="输入否定词">
+不要低画质，模糊，变形，残缺，水印文字，多余肢体，五官崩坏，画面杂乱</textarea
+                            >
+                        </div>
+                        <button class="btn btn-primary btn-confirm" onclick="generatePrompt()">🔄 生成提示词</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CENTER PANEL ==================== -->
+            <div class="panel panel-center">
+                <div class="panel-header">
+                    <span>&#128221; 关键词信息</span>
+                </div>
+                <div class="panel-body">
+                    <div class="field-group">
+                        <label class="field-label hint"> 自动生成的提示词（可在此二次编辑修改） </label>
+                        <textarea
+                            id="keywordOutput"
+                            class="keyword-output"
+                            placeholder="选择左侧选项后将自动生成提示词…"></textarea>
+                    </div>
+
+                    <div class="action-bar">
+                        <button class="btn btn-outline" onclick="copyPrompt()">📋 复制</button>
+                        <button class="btn btn-success" onclick="saveToHistory()">💾 保存</button>
+                        <button class="btn btn-outline" onclick="clearPrompt()">🗑️ 清空</button>
+                    </div>
+
+                    <!-- 文生图区域 -->
+                    <div class="section t2i-section">
+                        <div class="section-title">文生图</div>
+                        <div class="t2i-controls">
+                            <div class="t2i-model-select">
+                                <label class="field-label">模型选择</label>
+                                <select id="modelSelector">
+                                    <option value="GPT" selected>GPT</option>
+                                    <option value="豆包">豆包</option>
+                                    <option value="Nano">Nano</option>
+                                    <option value="品学兼优">品学兼优</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary btn-generate" onclick="generateImage()">🎨 文生图</button>
+                        </div>
+                    </div>
+
+                    <!-- 图片展示区 -->
+                    <div class="image-display-area" id="imageDisplayArea">
+                        <div class="image-display-placeholder" id="imagePlaceholder">
+                            <svg
+                                width="48"
+                                height="48"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#ccc"
+                                stroke-width="1.2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <circle cx="8.5" cy="8.5" r="1.5" />
+                                <path d="M21 15l-5-5L5 21" />
+                                <path d="M3 16l4-4 3 3 4-4 5 5" />
+                            </svg>
+                            <span>点击「文生图」生成图片</span>
+                        </div>
+                        <div class="image-display-result" id="imageResult" style="display:none;">
+                            <div class="image-result-header">
+                                <span class="image-result-model" id="imageResultModel">GPT</span>
+                                <button class="btn btn-outline btn-sm" onclick="downloadImage()">⬇ 下载</button>
+                            </div>
+                            <div class="image-result-wrapper" id="imageResultWrapper">
+                                <img id="generatedImage" src="" alt="生成的图片" />
+                            </div>
+                        </div>
+                        <div class="image-loading" id="imageLoading" style="display:none;">
+                            <div class="loading-spinner"></div>
+                            <span>正在生成图片...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== RIGHT PANEL ==================== -->
+            <div class="panel panel-right">
+                <div class="panel-header">
+                    <span>&#128218; 历史记录</span>
+                    <span class="header-actions">
+                        <button class="btn btn-clear-all" onclick="clearAllHistory()">清空</button>
+                        <span class="header-count" id="historyCount">0 条</span>
+                    </span>
+                </div>
+                <div class="panel-body" id="historyPanelBody">
+                    <div class="history-empty" id="historyEmpty">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5">
+                            <path d="M12 8v4l3 3M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
+                        </svg>
+                        <div>暂无历史记录</div>
+                        <div class="sub-text">保存的提示词将显示在这里</div>
+                    </div>
+                    <div class="history-list" id="historyList"></div>
+                </div>
+            </div>
+        </div>
+
+        <script src="app.js"></script>
+    </body>
+</html>
